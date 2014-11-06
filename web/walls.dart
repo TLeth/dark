@@ -12,7 +12,8 @@ class Floors {
   static const int MAX_VERICES = 65536;
   static const int MAX_SPRITES = MAX_VERICES ~/ 3;
 
-  GL.Buffer vertexBuffer, indexBuffer;
+  GL.Buffer vertexBuffer;
+  GL.Buffer indexBuffer;
 
 /*  int posLocation;
   int texOffsLocation;
@@ -22,7 +23,7 @@ class Floors {
   GL.UniformLocation projectionMatrixLocation;
   GL.UniformLocation viewMatrixLocation;
   GL.UniformLocation texAtlasSizeLocation;*/
-  
+
   Float32List vertexData = new Float32List(MAX_VERICES * FLOATS_PER_VERTEX);
 
 //  Floors(this.shader, this.texture, this.sectorDepthRender) {
@@ -80,59 +81,37 @@ class Floors {
         double xTexOffs = 0.0;
         double yTexOffs = 0.0;
 
-        vertexData.setAll(pp * FLOATS_PER_VERTEX, [
-            tox, ceiling, toy, dd, xTexOffs, yTexOffs, 1.0,
-            fromx, ceiling, fromy, dd, xTexOffs, yTexOffs, 1.0,
-            fromx, floor, fromy, dd, xTexOffs, yTexOffs, 1.0,
-            
-            tox, ceiling, toy, dd, xTexOffs, yTexOffs, 1.0,
-            fromx, floor, fromy, dd, xTexOffs, yTexOffs, 1.0,
-            tox, floor, toy, dd, xTexOffs, yTexOffs, 1.0]);
-        
-        pp+=6;
+        vertexData.setAll(pp * FLOATS_PER_VERTEX, [tox, ceiling, toy, dd, xTexOffs, yTexOffs, 1.0, fromx, ceiling, fromy, dd, xTexOffs, yTexOffs, 1.0, fromx, floor, fromy, dd, xTexOffs, yTexOffs, 1.0, tox, ceiling, toy, dd, xTexOffs, yTexOffs, 1.0, fromx, floor, fromy, dd, xTexOffs, yTexOffs, 1.0, tox, floor, toy, dd, xTexOffs, yTexOffs, 1.0]);
+
+        pp += 6;
       } else {
         if (ss.backSector.floorHeight > ss.sector.floorHeight) {
           double xTexOffs = 0.0;
           double yTexOffs = 0.0;
-          if (ss.backSector!=null && ss.backSector.floorTexture.isSky) {
-             xTexOffs = xSkyTexOffs;
-             yTexOffs = ySkyTexOffs;
-           }
+          if (ss.backSector != null && ss.backSector.floorTexture.isSky) {
+            xTexOffs = xSkyTexOffs;
+            yTexOffs = ySkyTexOffs;
+          }
 
           double backFloor = ss.backSector.floorHeight.toDouble();
 
-          vertexData.setAll(pp * FLOATS_PER_VERTEX, [
-              tox, backFloor, toy, dd, xTexOffs, yTexOffs, 1.0,
-              fromx, backFloor, fromy, dd, xTexOffs, yTexOffs, 1.0,
-              fromx, floor, fromy, dd, xTexOffs, yTexOffs, 1.0,
-        
-              tox, backFloor, toy, dd, xTexOffs, yTexOffs, 1.0,
-              fromx, floor, fromy, dd, xTexOffs, yTexOffs, 1.0,
-              tox, floor, toy, dd, xTexOffs, yTexOffs, 1.0]);
-          
-          pp+=6;
+          vertexData.setAll(pp * FLOATS_PER_VERTEX, [tox, backFloor, toy, dd, xTexOffs, yTexOffs, 1.0, fromx, backFloor, fromy, dd, xTexOffs, yTexOffs, 1.0, fromx, floor, fromy, dd, xTexOffs, yTexOffs, 1.0, tox, backFloor, toy, dd, xTexOffs, yTexOffs, 1.0, fromx, floor, fromy, dd, xTexOffs, yTexOffs, 1.0, tox, floor, toy, dd, xTexOffs, yTexOffs, 1.0]);
+
+          pp += 6;
         }
         if (ss.backSector.ceilingHeight < ss.sector.ceilingHeight) {
           double xTexOffs = 0.0;
           double yTexOffs = 0.0;
-          if (ss.backSector!=null && ss.backSector.ceilingTexture.isSky) {
+          if (ss.backSector != null && ss.backSector.ceilingTexture.isSky) {
             xTexOffs = xSkyTexOffs;
             yTexOffs = ySkyTexOffs;
           }
-          if (ss.backSector!=null && ss.backSector.ceilingTexture.isSky)
-          {
+          if (ss.backSector != null && ss.backSector.ceilingTexture.isSky) {
           } else {
             double backCeiling = ss.backSector.ceilingHeight.toDouble();
-            vertexData.setAll(pp * FLOATS_PER_VERTEX, [
-                tox, ceiling, toy, dd, xTexOffs, yTexOffs, 1.0,
-                fromx, ceiling, fromy, dd, xTexOffs, yTexOffs, 1.0,
-                fromx, backCeiling, fromy, dd, xTexOffs, yTexOffs, 1.0,
-      
-                tox, ceiling, toy, dd, xTexOffs, yTexOffs, 1.0,
-                fromx, backCeiling, fromy, dd, xTexOffs, yTexOffs, 1.0,
-                tox, backCeiling, toy, dd, xTexOffs, yTexOffs, 1.0]);
-            
-            pp+=6;
+            vertexData.setAll(pp * FLOATS_PER_VERTEX, [tox, ceiling, toy, dd, xTexOffs, yTexOffs, 1.0, fromx, ceiling, fromy, dd, xTexOffs, yTexOffs, 1.0, fromx, backCeiling, fromy, dd, xTexOffs, yTexOffs, 1.0, tox, ceiling, toy, dd, xTexOffs, yTexOffs, 1.0, fromx, backCeiling, fromy, dd, xTexOffs, yTexOffs, 1.0, tox, backCeiling, toy, dd, xTexOffs, yTexOffs, 1.0]);
+
+            pp += 6;
           }
         }
       }
@@ -145,45 +124,31 @@ class Floors {
           yTexOffs = ySkyTexOffs;
           sbr = 1.0;
         } else {
-          vertexData.setAll(pp * FLOATS_PER_VERTEX, [
-              tox, floor, toy, dd, xTexOffs, yTexOffs, sbr,
-              fromx, floor, fromy, dd, xTexOffs, yTexOffs, sbr,
-              pos.x, floor, pos.z, dd, xTexOffs, yTexOffs, sbr]);
-  
-          pp+=3;
+          vertexData.setAll(pp * FLOATS_PER_VERTEX, [tox, floor, toy, dd, xTexOffs, yTexOffs, sbr, fromx, floor, fromy, dd, xTexOffs, yTexOffs, sbr, pos.x, floor, pos.z, dd, xTexOffs, yTexOffs, sbr]);
+
+          pp += 3;
         }
       }
       if (ss.sector.ceilingTexture.isSky) {
         double xTexOffs = xSkyTexOffs;
         double yTexOffs = ySkyTexOffs;
         double sbr = 1.0;
-        if (ss.backSector!=null && (ss.backSector.ceilingTexture=="F_SKY1" && ss.backSector.ceilingHeight>ss.sector.ceilingHeight)) {
+        if (ss.backSector != null && (ss.backSector.ceilingTexture == "F_SKY1" && ss.backSector.ceilingHeight > ss.sector.ceilingHeight)) {
         } else {
-          vertexData.setAll(pp * FLOATS_PER_VERTEX, [
-              fromx, ceiling, fromy, dd, xTexOffs, yTexOffs, sbr,
-              tox, ceiling, toy, dd, xTexOffs, yTexOffs, sbr,
-              tox, 100000.0, toy, dd, xTexOffs, yTexOffs, sbr,
-  
-              fromx, ceiling, fromy, dd, xTexOffs, yTexOffs, sbr,
-              tox, 100000.0, toy, dd, xTexOffs, yTexOffs, sbr,
-              fromx, 100000.0, fromy, dd, xTexOffs, yTexOffs, sbr
-          ]);
-          pp+=6;
+          vertexData.setAll(pp * FLOATS_PER_VERTEX, [fromx, ceiling, fromy, dd, xTexOffs, yTexOffs, sbr, tox, ceiling, toy, dd, xTexOffs, yTexOffs, sbr, tox, 100000.0, toy, dd, xTexOffs, yTexOffs, sbr, fromx, ceiling, fromy, dd, xTexOffs, yTexOffs, sbr, tox, 100000.0, toy, dd, xTexOffs, yTexOffs, sbr, fromx, 100000.0, fromy, dd, xTexOffs, yTexOffs, sbr]);
+          pp += 6;
         }
       } else if (ceiling > pos.y) {
         double xTexOffs = ss.sector.ceilingTexture.xAtlasPos;
         double yTexOffs = ss.sector.ceilingTexture.yAtlasPos;
         double sbr = br;
-        vertexData.setAll(pp * FLOATS_PER_VERTEX, [
-            fromx, ceiling, fromy, dd, xTexOffs, yTexOffs, sbr,
-            tox, ceiling, toy, dd, xTexOffs, yTexOffs, sbr,
-            pos.x, ceiling, pos.z, dd, xTexOffs, yTexOffs, sbr]);
-        pp+=3;
+        vertexData.setAll(pp * FLOATS_PER_VERTEX, [fromx, ceiling, fromy, dd, xTexOffs, yTexOffs, sbr, tox, ceiling, toy, dd, xTexOffs, yTexOffs, sbr, pos.x, ceiling, pos.z, dd, xTexOffs, yTexOffs, sbr]);
+        pp += 3;
       }
     }
     gl.bufferSubDataTyped(GL.ARRAY_BUFFER, 0, vertexData.sublist(0, pp * FLOATS_PER_VERTEX) as Float32List);
   }
-  
+
   void render(Shader shader, GL.Texture texture) {
     shader.use();
     gl.bindTexture(GL.TEXTURE_2D, texture);
@@ -191,10 +156,10 @@ class Floors {
     shader.uniformMatrix4fv("u_modelMatrix", false, modelMatrix.storage);
     shader.uniformMatrix4fv("u_viewMatrix", false, viewMatrix.storage);
     shader.uniformMatrix4fv("u_projectionMatrix", false, projectionMatrix.storage);
-    shader.uniform1f("u_texAtlasSize", TEXTURE_ATLAS_SIZE+0.0);
+    shader.uniform1f("u_texAtlasSize", TEXTURE_ATLAS_SIZE + 0.0);
 
     gl.bindBuffer(GL.ARRAY_BUFFER, vertexBuffer);
-    
+
     shader.bindVertexData("a_pos", 4, 0, FLOATS_PER_VERTEX);
     shader.bindVertexData("a_texOffs", 2, 4, FLOATS_PER_VERTEX);
     shader.bindVertexData("a_brightness", 1, 6, FLOATS_PER_VERTEX);
@@ -214,10 +179,10 @@ class Floors {
     double ySkyTexOffs = resources.flats["_sky_"].yAtlasPos.toDouble();
 
     double floorDepth = 8.0;
-    
+
     for (int i = visibleSegs.length - 1; i >= 0; i--) {
       Segment ss = visibleSegs[i];
-      double dd = ss.dir-player.rot;
+      double dd = ss.dir - player.rot;
       double lowDist = ss.lowDistance;
       double highDist = ss.highDistance;
 
@@ -280,10 +245,10 @@ class Floors {
           vertexData.setAll((pp++) * FLOATS_PER_VERTEX, [fromx, floor, fromy, dd, lowDist, highDist]);
           vertexData.setAll((pp++) * FLOATS_PER_VERTEX, [tox, floor, toy, dd, lowDist, highDist]);
         }
-        if (false) { 
-          vertexData.setAll((pp++) * FLOATS_PER_VERTEX, [tox, orgFloor-floorDepth, toy, dd, lowDist, highDist]);
-          vertexData.setAll((pp++) * FLOATS_PER_VERTEX, [fromx, orgFloor-floorDepth, fromy, dd, lowDist, highDist]);
-          vertexData.setAll((pp++) * FLOATS_PER_VERTEX, [pos.x, orgFloor-floorDepth, pos.z, dd, lowDist, highDist]);
+        if (false) {
+          vertexData.setAll((pp++) * FLOATS_PER_VERTEX, [tox, orgFloor - floorDepth, toy, dd, lowDist, highDist]);
+          vertexData.setAll((pp++) * FLOATS_PER_VERTEX, [fromx, orgFloor - floorDepth, fromy, dd, lowDist, highDist]);
+          vertexData.setAll((pp++) * FLOATS_PER_VERTEX, [pos.x, orgFloor - floorDepth, pos.z, dd, lowDist, highDist]);
         }
       }
       if (orgCeiling > pos.y) {
@@ -299,7 +264,7 @@ class Floors {
         if (false) {
           vertexData.setAll((pp++) * FLOATS_PER_VERTEX, [fromx, orgCeiling, fromy, dd, lowDist, highDist]);
           vertexData.setAll((pp++) * FLOATS_PER_VERTEX, [tox, orgCeiling, toy, dd, lowDist, highDist]);
-          vertexData.setAll((pp++) * FLOATS_PER_VERTEX, [pos.x, orgCeiling+floorDepth, pos.z, dd, lowDist, highDist]);
+          vertexData.setAll((pp++) * FLOATS_PER_VERTEX, [pos.x, orgCeiling + floorDepth, pos.z, dd, lowDist, highDist]);
         }
       }
     }
@@ -308,7 +273,7 @@ class Floors {
   }
 }
 
-typedef bool InsertWallFunction(Float32List, int); 
+typedef bool InsertWallFunction(Float32List, int);
 
 class Walls {
   // Vertex data:
@@ -328,7 +293,8 @@ class Walls {
   Shader shader;
 
   GL.Texture texture;
-  GL.Buffer vertexBuffer, indexBuffer;
+  GL.Buffer vertexBuffer;
+  GL.Buffer indexBuffer;
 
   int posLocation;
   int uvLocation;
@@ -463,16 +429,17 @@ class WallRenderer {
     if (type == WALL_TYPE_LOWER) textureImage = sidedef.lowerTexture;
 
     if (textureImage != null) texture = textureImage.imageAtlas.texture;
-    if (texture==null) return;
-    
+    if (texture == null) return;
+
     InsertWallFunction iwf = (Float32List data, int offset) {
-      double floor, ceiling;
+      double floor;
+      double ceiling;
       if (type == WALL_TYPE_MIDDLE || type == WALL_TYPE_MIDDLE_TRANSPARENT) {
         floor = frontSector.floorHeight;
         ceiling = frontSector.ceilingHeight;
-        if (backSector!=null) {
-          if (backSector.floorHeight>floor) floor = backSector.floorHeight;
-          if (backSector.ceilingHeight<ceiling) ceiling = backSector.ceilingHeight;
+        if (backSector != null) {
+          if (backSector.floorHeight > floor) floor = backSector.floorHeight;
+          if (backSector.ceilingHeight < ceiling) ceiling = backSector.ceilingHeight;
         }
       }
       if (type == WALL_TYPE_UPPER) {
@@ -484,17 +451,17 @@ class WallRenderer {
         ceiling = backSector.floorHeight;
       }
       if (floor >= ceiling) return false;
-  
-      double texPosOffset = seg.offset+0.0;
+
+      double texPosOffset = seg.offset + 0.0;
       if (seg.wall.data.type == 0x30) { // Special type for scrolling textures
-        texPosOffset += textureScrollOffset%textureImage.width;
+        texPosOffset += textureScrollOffset % textureImage.width;
       }
-  
+
       double texCoordx0 = texPosOffset + sidedef.xTextureOffs;
       double texCoordx1 = texCoordx0 + seg.length;
       double texCoordy0;
       double texCoordy1;
-  
+
       // Check if the texture is pegged up or down
       bool pegTextureDown = false;
       if (type == WALL_TYPE_UPPER) {
@@ -502,10 +469,12 @@ class WallRenderer {
       } else {
         if (linedef.data.lowerUnpegged) pegTextureDown = true;
       }
-  
+
       if (type == WALL_TYPE_MIDDLE_TRANSPARENT) {
         // Middle transparent walls are only rendered one patch high
-        double newFloor, newCeiling;
+        double newFloor;
+        // Middle transparent walls are only rendered one patch high
+        double newCeiling;
         texCoordy0 = 0.0;
         texCoordy1 = textureImage.height + 0.0;
         if (pegTextureDown) {
@@ -515,7 +484,7 @@ class WallRenderer {
           newCeiling = ceiling + sidedef.yTextureOffs;
           newFloor = newCeiling - textureImage.height;
         }
-  
+
         // Clamp within the sector height
         if (newCeiling > ceiling) {
           texCoordy0 += newCeiling - ceiling;
@@ -540,18 +509,18 @@ class WallRenderer {
         texCoordy0 = sidedef.yTextureOffs + 0.0;
         texCoordy1 = texCoordy0 + (ceiling - floor) + 0.0;
       }
-  
+
       double texCoordxOffs = textureImage.xAtlasPos.toDouble();
       double texCoordyOffs = textureImage.yAtlasPos.toDouble();
       double texWidth = textureImage.width.toDouble();
-      double br = frontSector.lightLevel*seg.brightness;
+      double br = frontSector.lightLevel * seg.brightness;
       if (invulnerable) br = 1.0;
-  
+
       data.setAll(offset, [v1.x, ceiling.toDouble(), v1.y, texCoordx1, texCoordy0, texCoordxOffs, texCoordyOffs, texWidth, br, v0.x, ceiling.toDouble(), v0.y, texCoordx0, texCoordy0, texCoordxOffs, texCoordyOffs, texWidth, br, v0.x, floor.toDouble(), v0.y, texCoordx0, texCoordy1, texCoordxOffs, texCoordyOffs, texWidth, br, v1.x, floor.toDouble(), v1.y, texCoordx1, texCoordy1, texCoordxOffs, texCoordyOffs, texWidth, br,]);
       return true;
     };
 
-    if (type==WALL_TYPE_MIDDLE_TRANSPARENT) {
+    if (type == WALL_TYPE_MIDDLE_TRANSPARENT) {
       renderers.addMiddleTransparentWall(texture, iwf);
     } else {
       renderers.addWall(texture, iwf);

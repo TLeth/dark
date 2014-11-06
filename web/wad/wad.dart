@@ -11,7 +11,7 @@ part "wadbytedata.dart";
  */
 class WadFile {
   static HashSet<String> _ABSOLUTELY_NOT_IMAGE_LUMPS_ = new HashSet<String>.from(["THINGS", "LINEDEFS", "SIDEDEFS", "VERTEXES", "SEGS", "SSECTORS", "NODES", "SECTORS", "REJECT", "BLOCKMAP", "GENMIDI", "DMXGUS", "PLAYPAL", "COLORMAP", "ENDOOM", "TEXTURE1", "TEXTURE2", "PNAMES"]);
-  
+
   Playpal palette;
   Colormap colormap;
   WadByteData data;
@@ -20,15 +20,15 @@ class WadFile {
   HashMap<String, LumpInfo> lumpInfoMap = new HashMap<String, LumpInfo>();
 
   List<Image> patchList = new List<Image>();
-  
+
   HashMap<String, Image> wallTextures = new HashMap<String, Image>();
   HashMap<String, Image> patches = new HashMap<String, Image>();
   HashMap<String, Image> flats = new HashMap<String, Image>();
   HashMap<String, Image> sprites = new HashMap<String, Image>();
   HashMap<String, Image> images = new HashMap<String, Image>();
-  
+
   HashMap<String, Sample> samples = new HashMap<String, Sample>();
-  
+
   List<Animation> flatAnimations = new List<Animation>();
   List<Animation> wallAnimations = new List<Animation>();
 
@@ -47,7 +47,7 @@ class WadFile {
     readPatches();
     readAllWallTextures();
   }
-  
+
   void setupAnimations() {
     // Set up the flat animations
     flatAnimations.add(new Animation("NUKAGE1", "NUKAGE3"));
@@ -75,14 +75,14 @@ class WadFile {
     wallAnimations.add(new Animation("SFALL1", "SFALL4"));
     wallAnimations.add(new Animation("DBRAIN1", "DBRAIN4"));
   }
-  
-  
+
+
   void readHeader() {
-    String identification = data.getString( 0,  4);
-    if (identification!="IWAD") throw new FormatException("Not a PWAD");
+    String identification = data.getString(0, 4);
+    if (identification != "IWAD") throw new FormatException("Not a PWAD");
     int numLumps = data.getUint32(0x04);
     int infoTableOffs = data.getUint32(0x08);
-    if (infoTableOffs+numLumps*16>data.lengthInBytes) throw new FormatException("Can't contain lump table");
+    if (infoTableOffs + numLumps * 16 > data.lengthInBytes) throw new FormatException("Can't contain lump table");
 
     for (int i = 0; i < numLumps; i++) {
       int o = infoTableOffs + 16 * i;
@@ -90,51 +90,49 @@ class WadFile {
       int size = data.getInt32(o + 0x04);
       String name = data.getString(o + 0x08, 8);
 
-      if (pos+size>data.lengthInBytes) throw new FormatException("Can't contain lump \"$name\"");
-      
+      if (pos + size > data.lengthInBytes) throw new FormatException("Can't contain lump \"$name\"");
+
       LumpInfo lumpInfo = new LumpInfo(name, pos, size, i);
       lumpInfos.add(lumpInfo);
       lumpInfoMap[name] = lumpInfo;
     }
   }
-  
+
   void readPaletteAndColor() {
     palette = new Playpal.read(lumpInfoMap["PLAYPAL"].getByteData(data));
     colormap = new Colormap.read(lumpInfoMap["COLORMAP"].getByteData(data));
   }
-  
+
   void readSprites() {
-    for (int i = lumpInfoMap["S_START"].index+1; i < lumpInfoMap["S_END"].index; i++) {
+    for (int i = lumpInfoMap["S_START"].index + 1; i < lumpInfoMap["S_END"].index; i++) {
       LumpInfo lump = lumpInfos[i];
       sprites[lump.name] = new Image.read(lump.name, lump.getByteData(data));
     }
   }
-  
+
   void readFlats() {
-    for (int i = lumpInfoMap["F_START"].index+1; i < lumpInfoMap["F_END"].index; i++) {
+    for (int i = lumpInfoMap["F_START"].index + 1; i < lumpInfoMap["F_END"].index; i++) {
       LumpInfo lump = lumpInfos[i];
       flats[lump.name] = new Image.readFlat(lump.name, lump.getByteData(data));
       Animation.check(flatAnimations, lump.name, flats[lump.name]);
     }
   }
-  
+
   void readSamplesAndImages() {
     int depthCount = 0;
     for (int i = 0; i < lumpInfos.length; i++) {
       LumpInfo lump = lumpInfos[i];
-      
-      if (["F_START", "P_START"].contains(lump.name)) depthCount++;
-      else if (["F_END", "P_END"].contains(lump.name)) depthCount--;
-      else if (depthCount==0) {
+
+      if (["F_START", "P_START"].contains(lump.name)) depthCount++; else if (["F_END", "P_END"].contains(lump.name)) depthCount--; else if (depthCount == 0) {
         if (lump.name.startsWith("DS") && Sample.canBeRead(lump.name, lump.getByteData(data))) {
           samples[lump.name] = new Sample.read(lump.name, lump.getByteData(data));
         } else {
-          
-          if (lump.name=="SHTGA0") {
+
+          if (lump.name == "SHTGA0") {
             print("Found SHTGA0");
           }
           if (Image.canBeRead(lump.name, lump.getByteData(data))) {
-  //          print(lump.name);
+            //          print(lump.name);
             images[lump.name] = new Image.read(lump.name, lump.getByteData(data));
           }
         }
@@ -157,11 +155,11 @@ class WadFile {
       }
     }
   }
-  
+
   void readAllWallTextures() {
     if (lumpInfoMap.containsKey("TEXTURE1")) readWallTextures(lumpInfoMap["TEXTURE1"].getByteData(data));
     if (lumpInfoMap.containsKey("TEXTURE2")) readWallTextures(lumpInfoMap["TEXTURE2"].getByteData(data));
-  }  
+  }
 
   void readWallTextures(WadByteData data) {
     int count = data.getInt32(0);
@@ -194,14 +192,14 @@ class WadFile {
 
   Level loadLevel(String name) {
     if (!lumpInfoMap.containsKey(name)) throw new FormatException("No level called $name found in wad file");
-    int lumpIndex = lumpInfoMap[name].index+1;
-    
+    int lumpIndex = lumpInfoMap[name].index + 1;
+
     Level level = new Level();
     while (true) {
-      if (lumpIndex==lumpInfos.length) throw new FormatException("Level lumps led past end of file"); 
+      if (lumpIndex == lumpInfos.length) throw new FormatException("Level lumps led past end of file");
 
       LumpInfo lump = lumpInfos[lumpIndex++];
-      
+
       if (lump.name == "VERTEXES") level.vertices = Vertex.read(lump, lump.getByteData(data));
       if (lump.name == "LINEDEFS") level.linedefs = Linedef.read(lump, lump.getByteData(data));
       if (lump.name == "SIDEDEFS") level.sidedefs = Sidedef.read(lump, lump.getByteData(data));
@@ -254,7 +252,8 @@ class Animation {
 }
 
 class Vertex {
-  int x, y;
+  int x;
+  int y;
 
   Vertex(this.x, this.y);
 
@@ -325,7 +324,7 @@ class Blockmap {
     for (int i = 0; i < width * height; i++) {
       BlockCell bc = blockCells[i] = new BlockCell();
       int offset = data.getUint16(8 + i * 2) * 2;
-      
+
       int pp = 0;
       while (true) {
         int linedefId = data.getInt16(offset + (pp + 1) * 2);
@@ -539,21 +538,23 @@ class Sidedef {
 }
 
 class Linedef {
-  int fromVertexId, toVertexId;
+  int fromVertexId;
+  int toVertexId;
   int flags;
   int type;
   int tag;
   int rightSidedefId;
   int leftSidedefId;
 
-  Vertex fromVertex, toVertex;
+  Vertex fromVertex;
+  Vertex toVertex;
 
   Sidedef rightSidedef;
   Sidedef leftSidedef;
 
   int leftSectorId = -1;
   int rightSectorId = -1;
-  
+
   Sector rightSector;
   Sector leftSector;
 
@@ -669,7 +670,8 @@ class Sample {
 
 class Image {
   String name;
-  int width, height;
+  int width;
+  int height;
   int xCenter;
   int yCenter;
   Int16List pixels; // -1 = transparent. 0-255 = color index
@@ -702,8 +704,8 @@ class Image {
         int rowStart = data.getUint8(pos++);
         if (rowStart == 255) break;
         int count = data.getUint8(pos++);
-        if (count<0) return false;
-        
+        if (count < 0) return false;
+
         pos += count + 2;
         if (pos >= maxPos) {
           return false;
@@ -718,7 +720,7 @@ class Image {
     this.xCenter = 0;
     this.yCenter = 0;
 
-    pixels = new Int16List(width * height)..fillRange(0,  width*height, -1);
+    pixels = new Int16List(width * height)..fillRange(0, width * height, -1);
   }
 
   Image.tuttiFruttiEmpty(this.name, this.width, this.height) {
@@ -746,8 +748,8 @@ class Image {
 
         int sp = (x + y * source.width);
         int dp = (dx + dy * width);
-        
-        if (source.pixels[sp]>=0 || overwrite) pixels[dp] = source.pixels[sp];
+
+        if (source.pixels[sp] >= 0 || overwrite) pixels[dp] = source.pixels[sp];
       }
     }
   }
@@ -764,19 +766,19 @@ class Image {
       pixels[i] = data.getUint8(i);
     }
   }
-  
+
   Image.mirror(Image source) {
     this.name = source.name;
     width = source.width;
     height = source.height;
-    xCenter = width-source.xCenter-1;
+    xCenter = width - source.xCenter - 1;
     yCenter = source.yCenter;
 
     pixels = new Int16List(width * height);
 
-    for (int y=0; y<height; y++) {
-      for (int x=0; x<width; x++) {
-        pixels[x+y*width] = source.pixels[(width-x-1)+y*width];
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        pixels[x + y * width] = source.pixels[(width - x - 1) + y * width];
       }
     }
   }
@@ -787,7 +789,7 @@ class Image {
     xCenter = data.getInt16(0x04);
     yCenter = data.getInt16(0x06);
 
-    pixels = new Int16List(width * height)..fillRange(0,  width*height, -1);
+    pixels = new Int16List(width * height)..fillRange(0, width * height, -1);
 
     var columns = new List<int>(width);
     for (int x = 0; x < width; x++) {
@@ -812,7 +814,9 @@ class Image {
 }
 
 class LumpInfo {
-  int filePos, size, index;
+  int filePos;
+  int size;
+  int index;
   String name;
 
   LumpInfo(this.name, this.filePos, this.size, this.index);
